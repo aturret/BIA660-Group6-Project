@@ -23,7 +23,8 @@ def test_get_single_movie_ratings_info():
 
 def test_get_single_movie_info():
     print('')
-    url = 'https://www.imdb.com/title/tt0111161/'
+    # url = 'https://www.imdb.com/title/tt0111161/'
+    url = 'https://www.imdb.com/title/tt0245429'
     # print(get_single_movie_info(url, agent_headers,'Selenium'))
     print(get_single_movie_info(url, agent_headers))
 
@@ -44,8 +45,8 @@ def test_get_imdb_top250_metadata():
 
 def test_get_review_links():
     print('')
-    url = 'https://www.imdb.com/title/tt0032976/reviews'
-    print(get_review_links(url, agent_headers))
+    url = 'https://www.imdb.com/title/tt0111161/reviews'
+    get_review_links(url, agent_headers)
 
 
 def test_get_single_review():
@@ -57,8 +58,20 @@ def test_get_single_review():
 def test_get_all_reviews_of_single_movie():
     print('')
     url = 'https://www.imdb.com/title/tt0032976/reviews'
-    links = get_review_links(url, agent_headers)
-    print(get_all_reviews_of_single_movie(links, agent_headers))
+    print(get_all_reviews_of_single_movie(url, agent_headers))
+
+def test_get_all_reviews_of_top250():
+    print('')
+    url = 'https://www.imdb.com/chart/top/'
+    links = get_imdb_top250_links(url, agent_headers)
+    # print(get_imdb_top250_metadata(links, agent_headers,'Selenium'))
+    metadata = get_imdb_top250_metadata(links, agent_headers)
+    get_all_reviews_of_all_movies(metadata,agent_headers)
+
+
+
+
+
 
 
 def test_write_csv_file():

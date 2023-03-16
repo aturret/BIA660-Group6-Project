@@ -35,7 +35,9 @@ def get_imdb_top250_links(url, headers):
     return movie_links
 
 
-def get_single_movie_info(url, headers, method='requests', col=single_movie_col):
+def get_single_movie_info(url, headers, method='requests', col=None):
+    if col is None:
+        col = single_movie_col
     print(url)
     movie_info = []
     movie_page = None
@@ -63,11 +65,21 @@ def get_single_movie_info(url, headers, method='requests', col=single_movie_col)
         for genre in movie_genres_list:
             movie_genres.append(genre.find('span').text)
         # print(movie_genres)
-        movie_basic_info_list = movie_soup.find('h1').find_next_sibling().find_all('li')
-        # print(movie_basic_info_list)
-        movie_year = movie_basic_info_list[0].find('a').text
-        movie_content_rating = movie_basic_info_list[1].find('a').text
-        movie_duration = movie_basic_info_list[2].text
+        try:
+            movie_title_siblings = movie_soup.find('h1').find_next_siblings()
+            if movie_title_siblings[0].find_all():
+                movie_basic_info_list = movie_title_siblings[0].find_all('li')
+            else:
+                movie_basic_info_list = movie_title_siblings[1].find_all('li')
+            movie_year = movie_basic_info_list[0].find('a').text if movie_basic_info_list[0].find('a') else None
+            movie_content_rating = movie_basic_info_list[1].find('a').text if movie_basic_info_list[1].find('a') else None
+            movie_duration = movie_basic_info_list[2].text if len(movie_basic_info_list)>2 else None
+        except Exception as e:
+            print(e)
+            with open('test/'+movie_title+'.html', 'w', encoding="utf-8") as f:
+                f.write(movie_page.decode('utf-8'))
+            pass
+            raise Exception('movie_basic_info_list error')
         movie_reviews_link = 'https://imdb.com' + re.sub(r'\?ref_=.*', '', movie_soup.find("section", attrs={
             'data-testid': 'UserReviews'}) \
                                                          .find('a', class_='ipc-title-link-wrapper').get('href'))
@@ -139,23 +151,28 @@ def get_review_links(reviews_link, headers):
     driver = webdriver.Chrome(options=options)
     try:
         driver.get(reviews_link)
+        while True:
+            try:
+            # next_page = driver.find_elements()[0]
+                wait = WebDriverWait(driver, 3)
+                button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='ipl-load-more__button']")))
+                if button:
+                    # print('clicking button')
+                    button.click()
+                    time.sleep(1)
+                else:
+                    print('no more button')
+                    break
+            except Exception as e:
+                print(e)
+                break
         reviews_page = driver.page_source
         reviews_soup = BeautifulSoup(reviews_page, 'html.parser')
-        while True:
-            # next_page = driver.find_elements()[0]
-            wait = WebDriverWait(driver, 3)
-            button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='ipl-load-more__button']")))
-            if button:
-                print('clicking button')
-                button.click()
-                time.sleep(1)
-            else:
-                print('no more button')
-                break
-        reviews = reviews_soup.find('div', class_='lister-list').find_all('div')
+        reviews = reviews_soup.find('div', class_='lister-list').find_all('div', {'class': ['lister-item', 'mode-detail','imdb-user-review']} )
         for review in reviews:
-            review_link = 'https://imdb.com' + review.find('a').get('href')
+            review_link = re.sub(r'\?ref_=.*', '', 'https://imdb.com' + review.find('a').get('href'))
             review_links.append(review_link)
+        print(len(review_links))
     except Exception as e:
         print(e)
     finally:
@@ -199,6 +216,13 @@ def get_all_reviews_of_single_movie(reviews_link, headers, col=None):
     for link in review_links:
         data.append(get_single_review(link, headers))
     title = data[0][1]
-    write_csv_file(filename=title+'_reviews.csv', columns=col, records=data)
+    write_csv_file(filename='data/'+title+'_reviews.csv', columns=col, records=data)
     reviews = pd.DataFrame(data, columns=col)
     return reviews
+
+def get_all_reviews_of_all_movies(metadata, headers, col=None):
+    if col is None:
+        col = single_review_col
+    for index, row in metadata.iterrows():
+        reviews_link = row['movie_reviews_link']
+        reviews = get_all_reviews_of_single_movie(reviews_link, headers, col=col)
