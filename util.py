@@ -40,3 +40,10 @@ def get_page_by_selenium(url: str, wait_time: int = 10,user_agent: str = default
     finally:
         driver.quit()
     return html
+
+
+def sanitize_filename(filename):
+    invalid_chars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
+    for char in invalid_chars:
+        filename = filename.replace(char, '_')
+    return filename

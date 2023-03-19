@@ -1,6 +1,11 @@
 from get_functions import *
 from util import *
+import pandas as pd
 import pytest
+
+'''
+this is a unit test file for functions in get_functions.py
+'''
 
 agent_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko)'
@@ -24,7 +29,7 @@ def test_get_single_movie_ratings_info():
 def test_get_single_movie_info():
     print('')
     # url = 'https://www.imdb.com/title/tt0111161/'
-    url = 'https://www.imdb.com/title/tt0245429'
+    url = 'https://www.imdb.com/title/tt0245429/'
     # print(get_single_movie_info(url, agent_headers,'Selenium'))
     print(get_single_movie_info(url, agent_headers))
 
@@ -57,21 +62,18 @@ def test_get_single_review():
 
 def test_get_all_reviews_of_single_movie():
     print('')
-    url = 'https://www.imdb.com/title/tt0032976/reviews'
+    url = 'https://imdb.com/title/tt0457430/reviews'
     print(get_all_reviews_of_single_movie(url, agent_headers))
+
 
 def test_get_all_reviews_of_top250():
     print('')
-    url = 'https://www.imdb.com/chart/top/'
-    links = get_imdb_top250_links(url, agent_headers)
+    # m = 138
+    # n = 239
     # print(get_imdb_top250_metadata(links, agent_headers,'Selenium'))
-    metadata = get_imdb_top250_metadata(links, agent_headers)
-    get_all_reviews_of_all_movies(metadata,agent_headers)
-
-
-
-
-
+    metadata = pd.read_csv('test/imdb_top250_metadata.csv', header=0)
+    # get_all_reviews_of_all_movies(metadata.iloc[m:n, :], agent_headers)
+    get_all_reviews_of_all_movies(metadata.iloc[[239,249]],agent_headers)
 
 
 def test_write_csv_file():
@@ -80,6 +82,7 @@ def test_write_csv_file():
     columns = ['a', 'b', 'c']
     records = [['1', 2, '3'], ['4', '5', '6']]
     print(write_csv_file(filename, columns, records))
+
 
 
 pytest
