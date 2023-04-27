@@ -1,10 +1,10 @@
 import csv
-import re
 from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
+import re
 
 default_user_agent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.221 Safari/537.36 SE 2.X MetaSr 1.0'
 

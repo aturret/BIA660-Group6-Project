@@ -1,17 +1,20 @@
 import nltk
 from nltk.corpus import stopwords
+from sklearn.metrics import pairwise_distances
+from nltk.stem import SnowballStemmer
 import os
 import re
-import pandas as pd
 from datetime import datetime
+import pandas as pd
+import numpy as np
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_colwidth', None)
 
 # basic settings
-default_df = pd.read_csv('test/imdb_top250_metadata.csv', header=0)
-default_rw = pd.read_csv('test/High and Low_reviews.csv', header=0)
+default_df = pd.read_csv('test_data/imdb_top250_metadata.csv', header=0)
+default_rw = pd.read_csv('test_data/High and Low_reviews.csv', header=0)
 
 
 # print(default_df.review_number.sort_values(ascending=True).head(10))
@@ -54,11 +57,63 @@ def clean_text(x):
     return clean
 
 
-def tokenization(x):
+def tokenization(doc):
     pattern = r'\w[\w\',-]*\w'
-    tokens = nltk.regexp_tokenize(x, pattern)
+    tokens = nltk.regexp_tokenize(doc.lower(), pattern)
+    stop_words = stopwords.words('english')
+    filtered_tokens = [w for w in tokens if w not in stop_words]
+    # print(filtered_tokens)
+    return filtered_tokens
 
-    return tokens
+
+def stemming(tokens):
+    stemmer = SnowballStemmer('english')
+    stemmed_tokens = [stemmer.stem(w) for w in tokens]
+    # print(stemmed_tokens)
+    return stemmed_tokens
+
+
+def get_tokens(doc):
+    tokens = tokenization(doc)
+    stemming_tokens = stemming(tokens)
+    return stemming_tokens
+
+
+def get_frequency(tokens):
+    freq = nltk.FreqDist(tokens)
+    return freq
+
+
+def get_token_count(doc):
+    tokens = tokenization(doc)
+    stemming_tokens = stemming(tokens)
+    token_count = get_frequency(stemming_tokens)
+    return token_count
+
+
+def get_docs_frequency(docs):
+    docs_token = {}
+    for idx, doc in enumerate(docs):
+        docs_token[idx] = get_token_count(doc)
+    return docs_token
+
+
+def get_frequency_dataframe(docs):
+    pd.options.display.float_format = '{:,.2f}'.format
+    docs_token = get_docs_frequency(docs)
+    dtm = pd.DataFrame.from_dict(docs_token, orient='index')
+    dtm = dtm.fillna(0)
+    dtm = dtm.sort_index(axis=0)
+    tf = dtm.values
+    doc_len = tf.sum(axis=1, keepdims=True)
+    tf = np.divide(tf, doc_len)
+    df = np.where(tf > 0, 1, 0)
+    smoothed_idf = np.log(np.divide(len(docs) + 1, np.sum(df, axis=0) + 1)) + 1
+    smoothed_tf_idf = tf * smoothed_idf
+    similarity = 1 - pairwise_distances(smoothed_tf_idf, metric='cosine')
+    # np.argsort(similarity)[:, ::-1][0, 0:2]
+    print(similarity)
+    return smoothed_tf_idf
 
 
 # convert csv string to list
@@ -81,32 +136,32 @@ def duration_converting(df=default_df):
 def date_converting(df=default_rw):
     df['review_date'] = df['review_date'].apply(review_date_to_datetime)
     df['review_date'] = pd.to_datetime(df['review_date'])
-    print(df['review_date'])
-    print(df.info())
+    # print(df['review_date'])
+    # print(df.info())
 
 
-def preprocess_single_review(df=default_rw):
+def preprocess_single_review(df=default_rw, clean=False):
     date_converting(df)
-    df['review_text'] = df['review_text'].apply(clean_text)
-    df.to_csv('processed_data/' + df['movie_title'] + '_reviews.csv', index=False)
+    if clean:
+        df['review_text'] = df['review_text'].apply(clean_text)
+    # df.to_csv('processed_data/' + df['movie_title'] + '_reviews.csv', index=False)
     print(df)
 
 
-def preprocess_all_reviews():
+def preprocess_all_reviews(clean=False):
     result_df = None
     # iterate through all csv files in the data folder
     for file in os.listdir('data'):
         if file.endswith('.csv'):
             df = pd.read_csv('data/' + file, header=0)
             # preprocess each review file
-            preprocess_single_review(df)
+            preprocess_single_review(df, clean=clean)
             if result_df is None:
                 result_df = df
             else:
                 result_df = pd.concat([result_df, df])
             # save the preprocessed file to the data folder
-
-    result_df.to_csv('processed_data/all_reviews.csv', index=False)
+    result_df.to_csv('all_reviews.csv', index=False)
     return result_df
 
 
@@ -122,13 +177,6 @@ def check_review_repeating(df=default_df):
             if a in namelist:
                 namelist.remove(a)
             else:
-                print(a+'not in list')
+                print(a + 'not in list')
     print(namelist)
 
-
-# print(default_rw.iloc[:, -3].apply(clean_text).head(10))
-# print(default_df.iloc[:, -1].sum())
-# print(default_df.movie_genres[0])
-# print(default_df.movie_genres.head(10))
-# print(default_df.movie_genres.apply(convert_list).head(10))
-# print(type(default_df.movie_genres.tolist()[0]))

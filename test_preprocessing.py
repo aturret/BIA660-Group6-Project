@@ -4,9 +4,10 @@ import pandas as pd
 import pytest
 
 '''
-this is a unit test file for functions in get_functions.py
+this is a unit test_data file for functions in get_functions.py
 '''
-
+default_df = pd.read_csv('test_data/imdb_top250_metadata.csv', header=0)
+default_rw = pd.read_csv('test_data/High and Low_reviews.csv', header=0)
 agent_headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko)'
                   ' Chrome/49.0.2623.221 Safari/537.36 SE 2.X MetaSr 1.0'}
@@ -35,6 +36,23 @@ def test_preprocess_single_review():
     preprocess_single_review()
 
 
+def test_preprocess_all_reviews():
+    preprocess_all_reviews()
 
+
+def test_tokenization():
+    a = tokenization(default_rw.review_title[0])
+    b = stemming(a)
+
+
+def test_get_docs_frequency():
+    get_docs_frequency(default_rw.review_text)
+
+
+def test_frequency_dataframe():
+    print('')
+    tf_idf = get_frequency_dataframe(default_rw.review_text)
+    print(tf_idf.head())
+    print(tf_idf.info())
 
 pytest

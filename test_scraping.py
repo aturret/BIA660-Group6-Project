@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 '''
-this is a unit test file for functions in get_functions.py
+this is a unit test_data file for functions in get_functions.py
 '''
 
 agent_headers = {
@@ -71,7 +71,7 @@ def test_get_all_reviews_of_top250():
     # m = 138
     # n = 239
     # print(get_imdb_top250_metadata(links, agent_headers,'Selenium'))
-    metadata = pd.read_csv('test/imdb_top250_metadata.csv', header=0)
+    metadata = pd.read_csv('test_data/imdb_top250_metadata.csv', header=0)
     # get_all_reviews_of_all_movies(metadata.iloc[m:n, :], agent_headers)
     get_all_reviews_of_all_movies(metadata.iloc[[239,249]],agent_headers)
 

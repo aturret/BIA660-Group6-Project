@@ -1,13 +1,5 @@
-import requests
-from bs4 import BeautifulSoup
-import csv
-import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
-import re
 from util import *
 
 single_movie_col = ['movie_id', 'movie_title', 'movie_rating', 'movie_rating_number', 'movie_genres', 'movie_year',
@@ -77,7 +69,7 @@ def get_single_movie_info(url, headers, method='requests', col=None):
             movie_duration = movie_basic_info_list[2].text if len(movie_basic_info_list) > 2 else None
         except Exception as e:
             print(e)
-            with open('test/' + movie_title + '.html', 'w', encoding="utf-8") as f:
+            with open('test_data/' + movie_title + '.html', 'w', encoding="utf-8") as f:
                 f.write(movie_page.decode('utf-8'))
             pass
             raise Exception('movie_basic_info_list error')
