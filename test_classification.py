@@ -48,10 +48,10 @@ def test_sample_size_impact():
 def test_helpfulness_label_model():
     print('')
     df = get_helpfulness_rate(all_reviews)
-    df = label_reviews(df,'review_text','helpfulness_rate')
+    df = label_reviews(df, 'review_text', 'helpfulness_rate')
     x_train, x_test, y_train, y_test = train_test_split(df['review_text'], df['label'], test_size=0.3, random_state=0)
     create_model(x_train, y_train, x_test, y_test, model_type='svm', min_df=1, stop_words=None,
-                                        print_result=True, algorithm_para=0.5)
+                 print_result=True, algorithm_para=0.5)
 
 
 pytest
