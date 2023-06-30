@@ -4,6 +4,21 @@
 !/data/
 /processed_data/*
 !/processed_data/
-__pychache__/
+__pychache__/*
+reference/*
 .idea/
 .pytest_cache/
+High and Low_reviews.csv
+test.csv
+__pycache__/classification.cpython-310.pyc
+__pycache__/exploratory_data_analysis.cpython-310.pyc
+__pycache__/get_functions.cpython-310.pyc
+__pycache__/preprocessing.cpython-310.pyc
+__pycache__/test_a.cpython-310-pytest-7.2.2.pyc
+__pycache__/test_classification.cpython-310-pytest-7.2.2.pyc
+__pycache__/test_exploratory_data_analysis.cpython-310-pytest-7.2.2.pyc
+__pycache__/test_preprocessing.cpython-310-pytest-7.2.2.pyc
+__pycache__/test_scraping.cpython-310-pytest-7.2.2.pyc
+__pycache__/util.cpython-310.pyc
+references/Aspect-based Sentiment Analysis.pdf
+references/Movies_Reviews_Sentiment_Analysis_and_Classification.pdf
